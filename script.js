@@ -2,7 +2,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const chatBox = document.getElementById("chat-box");
   const inputField = document.getElementById("user-input");
   const sendBtn = document.getElementById("send-btn");
-  const searchToggle = document.getElementById("search-toggle");
 
   inputField.addEventListener("keydown", (e) => {
     if (e.key === "Enter") sendMessage();
@@ -20,9 +19,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let reply = "";
 
     try {
-      reply = await getBlitzResponse(userText);
+      reply = await getOpenAIResponse(userText);
     } catch (err) {
-      reply = "Hmm... something went wrong while thinking. Try again in a moment.";
+      reply = "Sorry, I couldn’t reach my brain right now.";
     }
 
     typeAnimatedReply("Blitz AI", reply, "ai");
@@ -58,22 +57,6 @@ document.addEventListener("DOMContentLoaded", () => {
     requestAnimationFrame(type);
   }
 
-  async function getBlitzResponse(input) {
-    const cleaned = input.toLowerCase().trim();
-
-    if (cleaned.startsWith("my name is ")) {
-      const name = input.replace(/my name is /i, "").trim();
-      localStorage.setItem("blitzUserName", name);
-      return `Nice to meet you, ${name}! I’ll remember that.`;
-    }
-
-    if (!searchToggle.checked) {
-      return processLocally(input);
-    }
-
-    return await getOpenAIResponse(input);
-  }
-
   async function getOpenAIResponse(prompt) {
     const apiKey = "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"; // 🔐 Replace with your actual OpenAI key
 
@@ -96,25 +79,5 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     return data.choices[0].message.content;
-  }
-
-  function processLocally(input) {
-    const cleaned = input.toLowerCase().trim();
-
-    if (cleaned.includes("hello")) return "Hey there!";
-    if (cleaned.includes("how are you")) return "Feeling electric ⚡ How about you?";
-    if (cleaned.includes("thank")) return "You're welcome!";
-    if (cleaned.includes("bye")) return "Catch you later!";
-
-    const mathMatch = cleaned.match(/(?:what(?:'s| is)|calculate|solve)\s+(.+)/);
-    const rawExpr = mathMatch ? mathMatch[1] : input;
-
-    try {
-      const expr = rawExpr.replace(/x/g, "*").replace(/÷/g, "/");
-      const result = math.evaluate(expr);
-      return `The answer is ${result}.`;
-    } catch {}
-
-    return `I’ve read your message: "${input}". Let’s explore what you’re aiming for.`;
   }
 });
