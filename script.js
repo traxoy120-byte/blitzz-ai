@@ -9,8 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   sendBtn.addEventListener("click", sendMessage);
 
-  async function sendMessage() {
-    const userText = inputField.value.trim();
+  async function sendMessage(userTextOverride = null) {
+    const userText = userTextOverride || inputField.value.trim();
     if (!userText) return;
 
     addMessage("You", userText, "user");
@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
       typeAnimatedReply("Blitz AI", reply, "ai");
     } catch (err) {
       console.error("OpenAI error:", err);
-      showErrorBubble("Sorry, I couldn't connect to servers. Please try again later.");
+      showErrorBubble("Sorry, I couldn't connect to servers. Please try again later.", userText);
     }
   }
 
@@ -55,12 +55,21 @@ document.addEventListener("DOMContentLoaded", () => {
     requestAnimationFrame(type);
   }
 
-  function showErrorBubble(message) {
+  function showErrorBubble(message, originalInput) {
     const bubble = document.createElement("div");
     bubble.className = "bubble error";
-    bubble.innerHTML = `<strong>Blitz AI:</strong> ${message}`;
+    bubble.innerHTML = `
+      <strong>Blitz AI:</strong> ${message}
+      <br><button class="retry-btn">Retry</button>
+    `;
     chatBox.appendChild(bubble);
     chatBox.scrollTop = chatBox.scrollHeight;
+
+    const retryBtn = bubble.querySelector(".retry-btn");
+    retryBtn.addEventListener("click", () => {
+      bubble.remove();
+      sendMessage(originalInput);
+    });
   }
 
   async function getOpenAIResponse(prompt) {
@@ -89,6 +98,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!data.choices || !data.choices[0]) {
       throw new Error("OpenAI returned no choices");
     }
+
+    return data.choices[0].message.content;
+  }
+});
 
     return data.choices[0].message.content;
   }
