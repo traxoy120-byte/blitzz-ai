@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const reply = getBlitzResponse(userText);
     setTimeout(() => {
-      addMessage("Blitz AI", reply, "ai");
+      typeAnimatedReply("Blitz AI", reply, "ai");
     }, 500);
   }
 
@@ -36,23 +36,42 @@ document.addEventListener("DOMContentLoaded", () => {
     chatBox.scrollTop = chatBox.scrollHeight;
   }
 
+  function typeAnimatedReply(sender, fullText, role) {
+    const bubble = document.createElement("div");
+    bubble.className = `bubble ${role}`;
+    bubble.innerHTML = `<strong>${sender}:</strong> <span class="typing"></span>`;
+    chatBox.appendChild(bubble);
+
+    const typingSpan = bubble.querySelector(".typing");
+    let i = 0;
+    const speed = 20;
+
+    function type() {
+      if (i < fullText.length) {
+        typingSpan.textContent += fullText.charAt(i);
+        i++;
+        chatBox.scrollTop = chatBox.scrollHeight;
+        setTimeout(type, speed);
+      }
+    }
+
+    type();
+  }
+
   function getBlitzResponse(input) {
     const cleaned = input.toLowerCase().trim();
 
-    // Memory: store name
     if (cleaned.startsWith("my name is ")) {
       const name = cleaned.replace("my name is ", "").trim();
       localStorage.setItem("blitzUserName", name);
       return `Nice to meet you, ${name}! I’ll remember that.`;
     }
 
-    // Casual replies
     if (cleaned.includes("hello") || cleaned.includes("hi")) return "Hey there!";
     if (cleaned.includes("how are you")) return "Feeling electric ⚡ How about you?";
     if (cleaned.includes("thank")) return "You're welcome!";
     if (cleaned.includes("bye")) return "Catch you later!";
 
-    // Paragraph or document request
     if (
       cleaned.includes("write a paragraph") ||
       cleaned.includes("make a document") ||
@@ -63,7 +82,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return generateParagraph(input);
     }
 
-    // Math detection
     const mathMatch = cleaned.match(/(?:what(?:'s| is)|calculate|solve)\s+(.+)/);
     const rawExpr = mathMatch ? mathMatch[1] : input;
 
@@ -73,12 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return `The answer is ${result}.`;
     } catch {}
 
-    // Smart fallback: analyze and respond
-    if (!searchToggle.checked) {
-      return generateSmartReply(cleaned);
-    }
-
-    return `I’ll look that up for you and get back with something useful.`;
+    return generateSmartReply(input);
   }
 
   function generateParagraph(input) {
@@ -93,21 +106,24 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function generateSmartReply(text) {
-    const keywords = ["ai", "chatbot", "project", "design", "help", "idea", "problem", "bug"];
-    const matched = keywords.filter(k => text.includes(k));
+    const cleaned = text.toLowerCase().trim();
+    const isQuestion = cleaned.endsWith("?") || cleaned.startsWith("what") || cleaned.startsWith("how");
+    const keywords = ["ai", "chatbot", "project", "design", "bug", "idea", "feature", "layout", "response"];
+    const matched = keywords.filter(k => cleaned.includes(k));
 
-    if (matched.length > 0) {
-      return `You're working on something involving ${matched.join(", ")} — tell me more so I can help.`;
-    }
+    const variants = [
+      `You're thinking about ${matched.join(", ")} — want help refining or expanding that idea?`,
+      `That’s a great question. Let’s break it down together.`,
+      `I see where you're going — what part do you want to explore more deeply?`,
+      `Interesting thought. Let's unpack it — what direction are you leaning toward?`,
+      `Could you tell me a bit more? I want to give a thoughtful answer.`,
+      `You're onto something — let’s build on that idea.`
+    ];
 
-    if (text.includes("you") && text.includes("smart")) {
-      return "I'm getting smarter every day — what would you like me to improve?";
-    }
+    if (matched.length > 0) return variants[0];
+    if (isQuestion) return variants[1];
+    if (cleaned.length < 10) return variants[4];
 
-    if (text.length < 10) {
-      return "Could you tell me a bit more? I want to give a thoughtful answer.";
-    }
-
-    return `Interesting thought. Let's unpack that together — what specifically are you curious about?`;
+    return variants[Math.floor(Math.random() * variants.length)];
   }
 });
