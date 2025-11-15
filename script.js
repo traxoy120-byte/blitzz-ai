@@ -10,17 +10,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   sendBtn.addEventListener("click", sendMessage);
 
-  function sendMessage() {
+  async function sendMessage() {
     const userText = inputField.value.trim();
     if (!userText) return;
 
     addMessage("You", userText, "user");
     inputField.value = "";
 
-    const reply = getBlitzResponse(userText);
-    setTimeout(() => {
-      typeAnimatedReply("Blitz AI", reply, "ai");
-    }, 500);
+    const reply = await getBlitzResponse(userText);
+    typeAnimatedReply("Blitz AI", reply, "ai");
   }
 
   function addMessage(sender, text, role) {
@@ -53,29 +51,48 @@ document.addEventListener("DOMContentLoaded", () => {
     type();
   }
 
-  function getBlitzResponse(input) {
-    const cleaned = input.toLowerCase().trim();
-
-    if (cleaned.startsWith("my name is ")) {
-      const name = cleaned.replace("my name is ", "").trim();
+  async function getBlitzResponse(input) {
+    if (input.toLowerCase().startsWith("my name is ")) {
+      const name = input.replace(/my name is /i, "").trim();
       localStorage.setItem("blitzUserName", name);
       return `Nice to meet you, ${name}! I’ll remember that.`;
     }
 
-    if (cleaned.includes("hello") || cleaned.includes("hi")) return "Hey there!";
+    if (!searchToggle.checked) {
+      return processLocally(input);
+    }
+
+    try {
+      const reply = await getOpenAIResponse(input);
+      return reply;
+    } catch {
+      return "Sorry, I couldn’t reach my brain right now.";
+    }
+  }
+
+  async function getOpenAIResponse(prompt) {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "sk-...DjwA" // Replace with your actual key
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+    return data.choices[0].message.content;
+  }
+
+  function processLocally(input) {
+    const cleaned = input.toLowerCase().trim();
+    if (cleaned.includes("hello")) return "Hey there!";
     if (cleaned.includes("how are you")) return "Feeling electric ⚡ How about you?";
     if (cleaned.includes("thank")) return "You're welcome!";
     if (cleaned.includes("bye")) return "Catch you later!";
-
-    if (
-      cleaned.includes("write a paragraph") ||
-      cleaned.includes("make a document") ||
-      cleaned.includes("give me a summary") ||
-      cleaned.includes("generate a report") ||
-      cleaned.includes("create a text about")
-    ) {
-      return generateParagraph(input);
-    }
 
     const mathMatch = cleaned.match(/(?:what(?:'s| is)|calculate|solve)\s+(.+)/);
     const rawExpr = mathMatch ? mathMatch[1] : input;
@@ -86,32 +103,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return `The answer is ${result}.`;
     } catch {}
 
-    return processInput(input);
+    return `I’ve read your message: "${input}". Let’s explore what you’re aiming for.`;
   }
-
-  function generateParagraph(input) {
-    const topicMatch = input.match(/(?:about|on|of|regarding)\s(.+)/i);
-    const topic = topicMatch ? topicMatch[1] : "your topic";
-
-    return `Sure! Here's a paragraph about ${topic}:\n\n${generateText(topic)}`;
-  }
-
-  function generateText(topic) {
-    return `The topic of ${topic} is both fascinating and complex. It involves multiple layers of understanding, ranging from basic principles to advanced applications. Whether you're exploring it for academic purposes or personal interest, ${topic} offers a rich field of ideas, challenges, and opportunities. Its relevance continues to grow in today's world, making it a subject worth studying and discussing.`;
-  }
-
-  function processInput(input) {
-    const cleaned = input.toLowerCase().trim();
-    const words = cleaned.split(/\s+/);
-    const verbs = ["want", "need", "like", "build", "fix", "make", "create", "design"];
-    const questions = ["what", "how", "why", "when", "where", "who"];
-
-    const isQuestion = questions.some(q => cleaned.startsWith(q));
-    const hasVerb = verbs.some(v => cleaned.includes(v));
-    const wordCount = words.length;
-
-    if (isQuestion) {
-      return `You're asking a thoughtful question. Let's think it through: ${input}`;
-    }
-
-    if (hasVerb && wordCount > 
+});
