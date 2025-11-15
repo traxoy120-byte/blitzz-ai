@@ -1,5 +1,18 @@
 const chatBox = document.getElementById("chat-box");
 const inputField = document.getElementById("user-input");
+const searchToggle = document.getElementById("search-toggle");
+const switchText = document.querySelector(".switch-text");
+
+// Update switch label text
+searchToggle.addEventListener("change", () => {
+  switchText.textContent = searchToggle.checked ? "Search: ON" : "Search: OFF";
+});
+
+// Load memory on startup
+const userName = localStorage.getItem("blitzUserName");
+if (userName) {
+  addMessage("Blitz AI", `Welcome back, ${userName}!`, "ai");
+}
 
 inputField.addEventListener("keydown", (e) => {
   if (e.key === "Enter") sendMessage();
@@ -76,9 +89,18 @@ function animateDots(el) {
   setTimeout(() => clearInterval(interval), 1000);
 }
 
-// Main logic: smart response engine
+// Main logic: smart response engine with memory + toggle
 async function getBlitzResponse(input) {
   const cleaned = input.toLowerCase().replace(/[^a-z0-9 ]/gi, "").trim();
+
+  // Check for name input
+  if (cleaned.startsWith("my name is ")) {
+    const name = cleaned.replace("my name is ", "").trim();
+    if (name) {
+      localStorage.setItem("blitzUserName", name);
+      return `Nice to meet you, ${name}! I’ll remember that.`;
+    }
+  }
 
   // Casual phrases and typo-tolerant matching
   const casualMap = {
@@ -100,12 +122,12 @@ async function getBlitzResponse(input) {
     }
   }
 
-  // If it's short or vague, don't search
-  if (cleaned.length < 4 || /^[a-z\s]+$/.test(cleaned) === false) {
-    return "Hmm... could you tell me a bit more so I can help?";
+  // If search is OFF, respond without searching
+  if (!searchToggle.checked) {
+    return generateLocalResponse(cleaned);
   }
 
-  // Otherwise, try to search the web
+  // Otherwise, search the web
   try {
     const res = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(input)}&format=json&no_redirect=1&no_html=1`);
     const data = await res.json();
@@ -147,4 +169,16 @@ function generateFallbackResponse(query) {
     `Hmm... no strong results for "${query}". Want to ask it a different way?`
   ];
   return phrases[Math.floor(Math.random() * phrases.length)];
+}
+
+// Local-only response generator (when search is OFF)
+function generateLocalResponse(cleaned) {
+  const responses = [
+    "That's interesting! Tell me more.",
+    "Sounds cool — what else are you thinking?",
+    "I like where this is going.",
+    "Let’s explore that together.",
+    "Hmm... I’d love to hear more about that."
+  ];
+  return responses[Math.floor(Math.random() * responses.length)];
 }
