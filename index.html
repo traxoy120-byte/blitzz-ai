@@ -1,13 +1,4 @@
 <!DOCTYPE html>
-<html>
-  <head><title>Blitz AI</title></head>
-  <body>
-    <h1>Welcome to Blitz AI</h1>
-    <p>Thanks for using this website.</p>
-  </body>
-</html>
-
-<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -18,9 +9,17 @@
 <body>
   <div class="container">
     <h1>⚡ Blitz AI</h1>
+
+    <label class="switch-label">
+      <input type="checkbox" id="search-toggle" checked />
+      <span class="switch-slider"></span>
+      <span class="switch-text">Search: ON</span>
+    </label>
+
     <div id="chat-box" class="chat-box"></div>
+
     <div class="input-area">
-      <input id="user-input" placeholder="Ask me anything..." />
+      <input id="user-input" placeholder="Ask anything..." />
       <button onclick="sendMessage()">Send</button>
     </div>
   </div>
