@@ -182,3 +182,56 @@ function generateLocalResponse(cleaned) {
   ];
   return responses[Math.floor(Math.random() * responses.length)];
 }
+const chatBox = document.getElementById("chat-box");
+const inputField = document.getElementById("user-input");
+
+inputField.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") sendMessage();
+});
+
+function sendMessage() {
+  const userText = inputField.value.trim();
+  if (!userText) return;
+
+  addMessage("You", userText, "user");
+  inputField.value = "";
+
+  const reply = getBlitzResponse(userText);
+  setTimeout(() => {
+    addMessage("Blitz AI", reply, "ai");
+  }, 500);
+}
+
+function addMessage(sender, text, role) {
+  const bubble = document.createElement("div");
+  bubble.className = `bubble ${role}`;
+  bubble.innerHTML = `<strong>${sender}:</strong> ${text}`;
+  chatBox.appendChild(bubble);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// Detect and solve math expressions
+function getBlitzResponse(input) {
+  const cleaned = input.toLowerCase().replace(/[^0-9x+\-*/(). ]/gi, "").trim();
+
+  // Replace x with * for multiplication
+  const mathExpr = cleaned.replace(/x/g, "*");
+
+  // Check if it's a valid math expression
+  if (/^\d+[\d\sx+\-*/().]*\d+$/.test(mathExpr)) {
+    try {
+      const result = eval(mathExpr);
+      return `The answer is ${result}.`;
+    } catch {
+      return "Hmm... I couldn't calculate that.";
+    }
+  }
+
+  // Casual replies
+  if (cleaned.includes("hello") || cleaned.includes("hi")) return "Hey there!";
+  if (cleaned.includes("how are you")) return "Feeling electric ⚡ How about you?";
+  if (cleaned.includes("thank")) return "You're welcome!";
+  if (cleaned.includes("bye")) return "Catch you later!";
+
+  return "I'm here to help — ask me anything!";
+}
