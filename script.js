@@ -86,27 +86,47 @@ async function fetchAIResponse(query) {
   try {
     const res = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_redirect=1&no_html=1`);
     const data = await res.json();
+
+    let sourceText = null;
+
     if (data.AbstractText) {
-      return rewriteInOwnWords(data.AbstractText);
+      sourceText = data.AbstractText;
     } else if (data.RelatedTopics?.length > 0 && data.RelatedTopics[0].Text) {
-      return rewriteInOwnWords(data.RelatedTopics[0].Text);
+      sourceText = data.RelatedTopics[0].Text;
+    }
+
+    if (sourceText) {
+      return rewriteInOwnWords(sourceText, query);
     } else {
-      return "I couldn't find anything specific, but I'm still learning!";
+      return generateFallbackResponse(query);
     }
   } catch (err) {
-    return "Oops! Something went wrong while searching.";
+    return "Hmm... I ran into a snag while searching. Try again in a moment.";
   }
 }
 
 // Rephrase result in Blitz AI's own words
-function rewriteInOwnWords(text) {
-  const phrases = [
-    "Here's what I found:",
-    "From what I understand:",
+function rewriteInOwnWords(text, query) {
+  const intros = [
+    "Here's what I gathered:",
+    "From what I found online:",
     "Based on what I read:",
     "This might help clarify:",
-    "According to what I found:"
+    "According to my search:"
   ];
-  const intro = phrases[Math.floor(Math.random() * phrases.length)];
-  return `${intro} ${text}`;
+  const intro = intros[Math.floor(Math.random() * intros.length)];
+  const rephrased = text.replace(/(?:is|was|are|were)/gi, "seems to be"); // light rewording
+  return `${intro} ${rephrased}`;
+}
+
+// Fallback if no search result is found
+function generateFallbackResponse(query) {
+  const phrases = [
+    "I'm still learning, but I couldn't find anything specific.",
+    "That’s a tough one — I didn’t find much online.",
+    "I searched around, but nothing solid came up.",
+    "No clear info found, but I’ll keep improving!",
+    "I couldn’t verify that yet, but I’m working on it."
+  ];
+  return phrases[Math.floor(Math.random() * phrases.length)];
 }
