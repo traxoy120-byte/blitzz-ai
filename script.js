@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function getOpenAIResponse(prompt) {
-    const apiKey = "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"; // 🔐 Replace with your actual OpenAI key
+    const apiKey = "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"; // 🔐 Replace with your actual OpenAI key
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
