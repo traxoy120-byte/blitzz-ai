@@ -11,7 +11,17 @@
 <body>
   <div class="main">
     <h1>What can I help with?</h1>
+
+    <div class="toggle-wrapper">
+      <label for="search-toggle">Search:</label>
+      <label class="switch">
+        <input type="checkbox" id="search-toggle" checked />
+        <span class="slider"></span>
+      </label>
+    </div>
+
     <div id="chat-box" class="chat-box"></div>
+
     <div class="input-wrapper">
       <input id="user-input" placeholder="Ask anything..." />
       <button onclick="sendMessage()">➤</button>
@@ -21,8 +31,8 @@
   <script>
     const chatBox = document.getElementById("chat-box");
     const inputField = document.getElementById("user-input");
+    const searchToggle = document.getElementById("search-toggle");
 
-    // Load memory
     const userName = localStorage.getItem("blitzUserName");
     if (userName) {
       addMessage("Blitz AI", `Welcome back, ${userName}!`, "ai");
@@ -56,20 +66,17 @@
     function getBlitzResponse(input) {
       const cleaned = input.toLowerCase().trim();
 
-      // Memory: store name
       if (cleaned.startsWith("my name is ")) {
         const name = cleaned.replace("my name is ", "").trim();
         localStorage.setItem("blitzUserName", name);
         return `Nice to meet you, ${name}! I’ll remember that.`;
       }
 
-      // Casual replies
       if (cleaned.includes("hello") || cleaned.includes("hi")) return "Hey there!";
       if (cleaned.includes("how are you")) return "Feeling electric ⚡ How about you?";
       if (cleaned.includes("thank")) return "You're welcome!";
       if (cleaned.includes("bye")) return "Catch you later!";
 
-      // Detect math phrasing
       const mathMatch = cleaned.match(/(?:what(?:'s| is)|calculate|solve)\s+(.+)/);
       const rawExpr = mathMatch ? mathMatch[1] : input;
 
@@ -77,9 +84,19 @@
         const expr = rawExpr.replace(/x/g, "*").replace(/÷/g, "/");
         const result = math.evaluate(expr);
         return `The answer is ${result}.`;
-      } catch {
-        return "Hmm... I couldn't solve that. Try rephrasing or check your math expression.";
+      } catch {}
+
+      if (!searchToggle.checked) {
+        const fallback = [
+          "That's interesting — tell me more.",
+          "Hmm... let's explore that together.",
+          "I like where this is going.",
+          "Sounds cool — what else are you thinking?"
+        ];
+        return fallback[Math.floor(Math.random() * fallback.length)];
       }
+
+      return "I’ll need to search for that — but my brain’s still warming up!";
     }
   </script>
 </body>
