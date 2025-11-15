@@ -76,29 +76,36 @@ function animateDots(el) {
   setTimeout(() => clearInterval(interval), 1000);
 }
 
-// MAIN LOGIC: Decide how to respond
+// Main logic: smart response engine
 async function getBlitzResponse(input) {
-  const lower = input.toLowerCase();
+  const cleaned = input.toLowerCase().replace(/[^a-z0-9 ]/gi, "").trim();
 
-  // 1. Handle casual phrases
-  const casualReplies = {
+  // Casual phrases and typo-tolerant matching
+  const casualMap = {
     "hello": ["Hey there!", "Hi! How can I help you today?", "Hello! Ready when you are."],
     "hi": ["Hi! 😊", "Hey! What’s on your mind?", "Hello there!"],
     "hey": ["Hey hey!", "Yo! What’s up?", "Hey! Need anything?"],
     "how are you": ["I’m feeling electric ⚡ How about you?", "Charged up and ready to chat!", "Doing great — thanks for asking!"],
     "thanks": ["You got it!", "Anytime!", "Glad I could help!"],
     "thank you": ["You're welcome!", "No problem at all!", "Happy to help!"],
-    "bye": ["Catch you later!", "Goodbye!", "See you soon!"]
+    "bye": ["Catch you later!", "Goodbye!", "See you soon!"],
+    "good morning": ["Good morning! ☀️ Ready to start the day?", "Morning! What’s on your mind?"],
+    "good night": ["Sleep well!", "Good night! Talk soon!", "Rest up — I’ll be here when you wake."]
   };
 
-  for (const key in casualReplies) {
-    if (lower === key || lower.includes(key)) {
-      const options = casualReplies[key];
+  for (const key in casualMap) {
+    if (cleaned.includes(key)) {
+      const options = casualMap[key];
       return options[Math.floor(Math.random() * options.length)];
     }
   }
 
-  // 2. Otherwise, try to search the web
+  // If it's short or vague, don't search
+  if (cleaned.length < 4 || /^[a-z\s]+$/.test(cleaned) === false) {
+    return "Hmm... could you tell me a bit more so I can help?";
+  }
+
+  // Otherwise, try to search the web
   try {
     const res = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(input)}&format=json&no_redirect=1&no_html=1`);
     const data = await res.json();
@@ -116,7 +123,7 @@ async function getBlitzResponse(input) {
       return generateFallbackResponse(input);
     }
   } catch (err) {
-    return "Hmm... I ran into a snag while searching. Try again in a moment.";
+    return "Oops! Something went wrong while searching. Try again in a moment.";
   }
 }
 
