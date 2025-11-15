@@ -4,11 +4,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const sendBtn = document.getElementById("send-btn");
   const searchToggle = document.getElementById("search-toggle");
 
-  const userName = localStorage.getItem("blitzUserName");
-  if (userName) {
-    addMessage("Blitz AI", `Welcome back, ${userName}!`, "ai");
-  }
-
   inputField.addEventListener("keydown", (e) => {
     if (e.key === "Enter") sendMessage();
   });
@@ -119,14 +114,4 @@ document.addEventListener("DOMContentLoaded", () => {
       return `You're asking a thoughtful question. Let's think it through: ${input}`;
     }
 
-    if (hasVerb && wordCount > 5) {
-      return `You're describing something you want to do. Here's how I understand it: "${input}". Let's break it down together.`;
-    }
-
-    if (wordCount <= 4) {
-      return `Could you tell me a bit more so I can respond clearly?`;
-    }
-
-    return `I’ve read your message carefully: "${input}". Let’s explore what you’re aiming for.`;
-  }
-});
+    if (hasVerb && wordCount > 
