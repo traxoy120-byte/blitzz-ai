@@ -53,6 +53,7 @@ h1 {
 
 .chat-box::-webkit-scrollbar {
   width: 6px;
+  margin-bottom: 80px;
 }
 
 .chat-box::-webkit-scrollbar-thumb {
@@ -184,3 +185,4 @@ button:hover {
 button:hover {
   background: #9333ea;
 }
+
