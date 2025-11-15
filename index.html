@@ -4,29 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Blitz AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap" rel="stylesheet" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 </head>
 <body>
-  <div class="main">
-    <h1>What can I help with?</h1>
-
-    <div class="toggle-container">
-      <label class="toggle-label">Search</label>
-      <label class="toggle-switch">
-        <input type="checkbox" id="search-toggle" checked />
-        <span class="slider"></span>
-      </label>
-    </div>
-
-    <div id="chat-box" class="chat-box"></div>
-
-    <div class="input-wrapper">
-      <input id="user-input" placeholder="Ask anything..." />
-      <button id="send-btn">➤</button>
-    </div>
-  </div>
+  <div id="chat-container"></div>
+  <input id="chat-input" type="text" placeholder="Ask Blitz AI something..." />
+  <script src="script.js"></script>
+</body>
+</html>
 
   <script src="script.js"></script>
 </body>
