@@ -83,28 +83,37 @@ h1 {
   align-self: flex-start;
 }
 
-.toggle-wrapper {
+/* ✅ Toggle + Input Layout */
+.input-area {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
   margin-top: 10px;
-  margin-bottom: 10px;
+}
+
+.toggle-container {
   display: flex;
   align-items: center;
   gap: 10px;
-  transition: all 0.3s ease;
 }
 
-.toggle-wrapper label {
+.toggle-label {
   font-size: 14px;
   font-weight: bold;
+  color: white;
 }
 
-.switch {
+.toggle-switch {
   position: relative;
   display: inline-block;
-  width: 40px;
-  height: 20px;
+  width: 50px;
+  height: 26px;
 }
 
-.switch input {
+.toggle-switch input {
   opacity: 0;
   width: 0;
   height: 0;
@@ -115,36 +124,34 @@ h1 {
   cursor: pointer;
   top: 0; left: 0;
   right: 0; bottom: 0;
-  background-color: #ccc;
-  border-radius: 20px;
+  background-color: red;
   transition: 0.4s;
+  border-radius: 26px;
 }
 
 .slider:before {
   position: absolute;
   content: "";
-  height: 14px;
-  width: 14px;
+  height: 20px;
+  width: 20px;
   left: 3px;
   bottom: 3px;
   background-color: white;
-  border-radius: 50%;
   transition: 0.4s;
+  border-radius: 50%;
 }
 
-input:checked + .slider {
-  background-color: #a855f7;
+.toggle-switch input:checked + .slider {
+  background-color: green;
 }
 
-input:checked + .slider:before {
-  transform: translateX(20px);
+.toggle-switch input:checked + .slider:before {
+  transform: translateX(24px);
 }
 
 .input-wrapper {
   display: flex;
-  margin-top: 10px;
   width: 100%;
-  max-width: 600px;
 }
 
 input {
@@ -168,6 +175,10 @@ button {
   font-size: 18px;
   cursor: pointer;
   transition: background 0.3s;
+}
+
+button:hover {
+  background: #9333ea;
 }
 
 button:hover {
