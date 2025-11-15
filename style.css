@@ -1,20 +1,68 @@
 body {
-  font-family: Arial, sans-serif;
-  padding: 20px;
-  background: #f4f4f4;
+  background: #0f172a;
+  color: #f1f5f9;
+  font-family: 'Segoe UI', sans-serif;
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+  margin: 0;
 }
-#chat-box {
-  border: 1px solid #ccc;
-  background: #fff;
-  padding: 10px;
+
+.container {
+  width: 100%;
+  max-width: 600px;
+  background: #1e293b;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #38bdf8;
+}
+
+.chat-box {
+  background: #0f172a;
+  border-radius: 12px;
+  padding: 15px;
   height: 300px;
   overflow-y: auto;
+  margin-bottom: 15px;
+  border: 1px solid #334155;
+}
+
+.chat-box div {
   margin-bottom: 10px;
+  line-height: 1.4;
 }
+
+.input-area {
+  display: flex;
+  gap: 10px;
+}
+
 input {
-  width: 70%;
-  padding: 8px;
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background: #334155;
+  color: #f1f5f9;
 }
+
 button {
-  padding: 8px 12px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #38bdf8;
+  color: #0f172a;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background: #0ea5e9;
 }
