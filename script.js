@@ -91,7 +91,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return `The answer is ${result}.`;
     } catch {}
 
-    return generateSmartReply(input);
+    return processInput(input);
   }
 
   function generateParagraph(input) {
@@ -105,25 +105,28 @@ document.addEventListener("DOMContentLoaded", () => {
     return `The topic of ${topic} is both fascinating and complex. It involves multiple layers of understanding, ranging from basic principles to advanced applications. Whether you're exploring it for academic purposes or personal interest, ${topic} offers a rich field of ideas, challenges, and opportunities. Its relevance continues to grow in today's world, making it a subject worth studying and discussing.`;
   }
 
-  function generateSmartReply(text) {
-    const cleaned = text.toLowerCase().trim();
-    const isQuestion = cleaned.endsWith("?") || cleaned.startsWith("what") || cleaned.startsWith("how");
-    const keywords = ["ai", "chatbot", "project", "design", "bug", "idea", "feature", "layout", "response"];
-    const matched = keywords.filter(k => cleaned.includes(k));
+  function processInput(input) {
+    const cleaned = input.toLowerCase().trim();
+    const words = cleaned.split(/\s+/);
+    const verbs = ["want", "need", "like", "build", "fix", "make", "create", "design"];
+    const questions = ["what", "how", "why", "when", "where", "who"];
 
-    const variants = [
-      `You're thinking about ${matched.join(", ")} — want help refining or expanding that idea?`,
-      `That’s a great question. Let’s break it down together.`,
-      `I see where you're going — what part do you want to explore more deeply?`,
-      `Interesting thought. Let's unpack it — what direction are you leaning toward?`,
-      `Could you tell me a bit more? I want to give a thoughtful answer.`,
-      `You're onto something — let’s build on that idea.`
-    ];
+    const isQuestion = questions.some(q => cleaned.startsWith(q));
+    const hasVerb = verbs.some(v => cleaned.includes(v));
+    const wordCount = words.length;
 
-    if (matched.length > 0) return variants[0];
-    if (isQuestion) return variants[1];
-    if (cleaned.length < 10) return variants[4];
+    if (isQuestion) {
+      return `You're asking a thoughtful question. Let's think it through: ${input}`;
+    }
 
-    return variants[Math.floor(Math.random() * variants.length)];
+    if (hasVerb && wordCount > 5) {
+      return `You're describing something you want to do. Here's how I understand it: "${input}". Let's break it down together.`;
+    }
+
+    if (wordCount <= 4) {
+      return `Could you tell me a bit more so I can respond clearly?`;
+    }
+
+    return `I’ve read your message carefully: "${input}". Let’s explore what you’re aiming for.`;
   }
 });
