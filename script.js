@@ -16,15 +16,13 @@ document.addEventListener("DOMContentLoaded", () => {
     addMessage("You", userText, "user");
     inputField.value = "";
 
-    let reply = "";
-
     try {
-      reply = await getOpenAIResponse(userText);
+      const reply = await getOpenAIResponse(userText);
+      typeAnimatedReply("Blitz AI", reply, "ai");
     } catch (err) {
-      reply = "Sorry, I couldn’t reach my brain right now.";
+      console.error("OpenAI error:", err);
+      showErrorBubble("Sorry, I couldn't connect to servers. Please try again later.");
     }
-
-    typeAnimatedReply("Blitz AI", reply, "ai");
   }
 
   function addMessage(sender, text, role) {
@@ -57,8 +55,16 @@ document.addEventListener("DOMContentLoaded", () => {
     requestAnimationFrame(type);
   }
 
+  function showErrorBubble(message) {
+    const bubble = document.createElement("div");
+    bubble.className = "bubble error";
+    bubble.innerHTML = `<strong>Blitz AI:</strong> ${message}`;
+    chatBox.appendChild(bubble);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
   async function getOpenAIResponse(prompt) {
-    const apiKey = "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"; // Replace with your actual OpenAI key
+    const apiKey = "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"; // 🔐 Replace with your actual OpenAI key
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -71,6 +77,12 @@ document.addEventListener("DOMContentLoaded", () => {
         messages: [{ role: "user", content: prompt }]
       })
     });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("OpenAI response error:", errorText);
+      throw new Error("OpenAI API error");
+    }
 
     const data = await response.json();
 
