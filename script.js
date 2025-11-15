@@ -1,7 +1,6 @@
 const chatBox = document.getElementById("chat-box");
 const inputField = document.getElementById("user-input");
 
-// Send message on Enter key
 inputField.addEventListener("keydown", (e) => {
   if (e.key === "Enter") sendMessage();
 });
@@ -24,13 +23,12 @@ function sendMessage() {
     const typeTarget = aiBubble.querySelector(".typewriter");
     const cursor = aiBubble.querySelector(".cursor");
 
-    fetchAIResponse(userText).then((reply) => {
+    getBlitzResponse(userText).then((reply) => {
       typeText(typeTarget, reply, 25, () => cursor.remove());
     });
   }, 1000);
 }
 
-// Add message bubble
 function addMessage(sender, text, role) {
   const bubble = document.createElement("div");
   bubble.className = `bubble ${role}`;
@@ -40,7 +38,6 @@ function addMessage(sender, text, role) {
   return bubble.querySelector("span");
 }
 
-// Typewriter effect with fade-in
 function typeText(element, text, speed, onComplete) {
   let i = 0;
   function type() {
@@ -59,7 +56,6 @@ function typeText(element, text, speed, onComplete) {
   type();
 }
 
-// Fade-in animation
 function fadeIn(el) {
   let opacity = 0;
   const step = 0.05;
@@ -71,7 +67,6 @@ function fadeIn(el) {
   animate();
 }
 
-// Animate thinking dots
 function animateDots(el) {
   let count = 0;
   const interval = setInterval(() => {
@@ -81,14 +76,34 @@ function animateDots(el) {
   setTimeout(() => clearInterval(interval), 1000);
 }
 
-// Fetch real info from the web
-async function fetchAIResponse(query) {
+// MAIN LOGIC: Decide how to respond
+async function getBlitzResponse(input) {
+  const lower = input.toLowerCase();
+
+  // 1. Handle casual phrases
+  const casualReplies = {
+    "hello": ["Hey there!", "Hi! How can I help you today?", "Hello! Ready when you are."],
+    "hi": ["Hi! 😊", "Hey! What’s on your mind?", "Hello there!"],
+    "hey": ["Hey hey!", "Yo! What’s up?", "Hey! Need anything?"],
+    "how are you": ["I’m feeling electric ⚡ How about you?", "Charged up and ready to chat!", "Doing great — thanks for asking!"],
+    "thanks": ["You got it!", "Anytime!", "Glad I could help!"],
+    "thank you": ["You're welcome!", "No problem at all!", "Happy to help!"],
+    "bye": ["Catch you later!", "Goodbye!", "See you soon!"]
+  };
+
+  for (const key in casualReplies) {
+    if (lower === key || lower.includes(key)) {
+      const options = casualReplies[key];
+      return options[Math.floor(Math.random() * options.length)];
+    }
+  }
+
+  // 2. Otherwise, try to search the web
   try {
-    const res = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_redirect=1&no_html=1`);
+    const res = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(input)}&format=json&no_redirect=1&no_html=1`);
     const data = await res.json();
 
     let sourceText = null;
-
     if (data.AbstractText) {
       sourceText = data.AbstractText;
     } else if (data.RelatedTopics?.length > 0 && data.RelatedTopics[0].Text) {
@@ -96,37 +111,33 @@ async function fetchAIResponse(query) {
     }
 
     if (sourceText) {
-      return rewriteInOwnWords(sourceText, query);
+      return rewriteInOwnWords(sourceText);
     } else {
-      return generateFallbackResponse(query);
+      return generateFallbackResponse(input);
     }
   } catch (err) {
     return "Hmm... I ran into a snag while searching. Try again in a moment.";
   }
 }
 
-// Rephrase result in Blitz AI's own words
-function rewriteInOwnWords(text, query) {
+function rewriteInOwnWords(text) {
   const intros = [
-    "Here's what I gathered:",
-    "From what I found online:",
-    "Based on what I read:",
-    "This might help clarify:",
-    "According to my search:"
+    "Here's what I found:",
+    "From what I gathered:",
+    "Based on my search:",
+    "This might help explain it:",
+    "According to what I read:"
   ];
   const intro = intros[Math.floor(Math.random() * intros.length)];
-  const rephrased = text.replace(/(?:is|was|are|were)/gi, "seems to be"); // light rewording
-  return `${intro} ${rephrased}`;
+  return `${intro} ${text}`;
 }
 
-// Fallback if no search result is found
 function generateFallbackResponse(query) {
   const phrases = [
-    "I'm still learning, but I couldn't find anything specific.",
-    "That’s a tough one — I didn’t find much online.",
-    "I searched around, but nothing solid came up.",
-    "No clear info found, but I’ll keep improving!",
-    "I couldn’t verify that yet, but I’m working on it."
+    `I looked around but didn’t find much on "${query}". Want to try rephrasing it?`,
+    `That’s a tricky one. I couldn’t find anything solid about "${query}".`,
+    `I searched for "${query}", but nothing clear came up. Still learning!`,
+    `Hmm... no strong results for "${query}". Want to ask it a different way?`
   ];
   return phrases[Math.floor(Math.random() * phrases.length)];
 }
