@@ -24,7 +24,44 @@ h1 {
   color: #000000;
 }
 
-#chat-box {
+.switch-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.switch-slider {
+  width: 40px;
+  height: 20px;
+  background: #ccc;
+  border: 2px solid #000;
+  border-radius: 10px;
+  position: relative;
+  cursor: pointer;
+}
+
+.switch-slider::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background: #000;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+input[type="checkbox"]:checked + .switch-slider::after {
+  left: 22px;
+}
+
+.switch-text {
+  font-weight: bold;
+}
+
+.chat-box {
   height: 300px;
   overflow-y: auto;
   margin-bottom: 15px;
