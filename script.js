@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function getOpenAIResponse(prompt) {
-    const apiKey = "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"; // 🔐 Replace with your actual OpenAI key
+    const apiKey = "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"; // Replace with your actual OpenAI key
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const data = await response.json();
 
     if (!data.choices || !data.choices[0]) {
-      throw new Error("No response from OpenAI");
+      throw new Error("OpenAI returned no choices");
     }
 
     return data.choices[0].message.content;
