@@ -17,7 +17,14 @@ document.addEventListener("DOMContentLoaded", () => {
     addMessage("You", userText, "user");
     inputField.value = "";
 
-    const reply = await getBlitzResponse(userText);
+    let reply = "";
+
+    try {
+      reply = await getBlitzResponse(userText);
+    } catch (err) {
+      reply = "Hmm... something went wrong while thinking. Try again in a moment.";
+    }
+
     typeAnimatedReply("Blitz AI", reply, "ai");
   }
 
@@ -37,22 +44,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const typingSpan = bubble.querySelector(".typing");
     let i = 0;
-    const speed = 20;
+    const speed = 12;
 
     function type() {
       if (i < fullText.length) {
         typingSpan.textContent += fullText.charAt(i);
         i++;
         chatBox.scrollTop = chatBox.scrollHeight;
-        setTimeout(type, speed);
+        requestAnimationFrame(type);
       }
     }
 
-    type();
+    requestAnimationFrame(type);
   }
 
   async function getBlitzResponse(input) {
-    if (input.toLowerCase().startsWith("my name is ")) {
+    const cleaned = input.toLowerCase().trim();
+
+    if (cleaned.startsWith("my name is ")) {
       const name = input.replace(/my name is /i, "").trim();
       localStorage.setItem("blitzUserName", name);
       return `Nice to meet you, ${name}! I’ll remember that.`;
@@ -62,20 +71,17 @@ document.addEventListener("DOMContentLoaded", () => {
       return processLocally(input);
     }
 
-    try {
-      const reply = await getOpenAIResponse(input);
-      return reply;
-    } catch {
-      return "Sorry, I couldn’t reach my brain right now.";
-    }
+    return await getOpenAIResponse(input);
   }
 
   async function getOpenAIResponse(prompt) {
+    const apiKey = "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"; // 🔐 Replace with your actual OpenAI key
+
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "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" // Replace with your actual key
+        "Authorization": `Bearer ${apiKey}`
       },
       body: JSON.stringify({
         model: "gpt-3.5-turbo",
@@ -84,11 +90,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const data = await response.json();
+
+    if (!data.choices || !data.choices[0]) {
+      throw new Error("No response from OpenAI");
+    }
+
     return data.choices[0].message.content;
   }
 
   function processLocally(input) {
     const cleaned = input.toLowerCase().trim();
+
     if (cleaned.includes("hello")) return "Hey there!";
     if (cleaned.includes("how are you")) return "Feeling electric ⚡ How about you?";
     if (cleaned.includes("thank")) return "You're welcome!";
