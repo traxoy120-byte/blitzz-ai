@@ -5,22 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Blitz AI</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
 </head>
 <body>
-  <div class="container">
-    <h1>⚡ Blitz AI</h1>
-
-    <label class="switch-label">
-      <input type="checkbox" id="search-toggle" checked />
-      <span class="switch-slider"></span>
-      <span class="switch-text">Search: ON</span>
-    </label>
-
+  <div class="main">
+    <h1>What can I help with?</h1>
     <div id="chat-box" class="chat-box"></div>
-
-    <div class="input-area">
+    <div class="input-wrapper">
       <input id="user-input" placeholder="Ask anything..." />
-      <button onclick="sendMessage()">Send</button>
+      <button onclick="sendMessage()">➤</button>
     </div>
   </div>
   <script src="script.js"></script>
