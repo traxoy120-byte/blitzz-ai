@@ -32,6 +32,8 @@ chatInput.addEventListener("keydown", async (e) => {
     appendMessage("You", prompt);
     chatInput.value = "";
 
+    console.log("Sending prompt:", prompt);
+
     try {
       const res = await fetch("https://your-proxy-url/chat", {
         method: "POST",
@@ -39,9 +41,15 @@ chatInput.addEventListener("keydown", async (e) => {
         body: JSON.stringify({ prompt })
       });
 
+      if (!res.ok) {
+        throw new Error(`Server error: ${res.status}`);
+      }
+
       const data = await res.json();
+      console.log("Received response:", data);
       appendMessage("Blitz AI", data.reply);
     } catch (err) {
+      console.error("Fetch error:", err);
       appendMessage("Blitz AI", "⚠️ Error reaching the server.");
     }
   }
