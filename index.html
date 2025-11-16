@@ -5,28 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Blitz AI</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
-
   <style>
-    /* Base */
-    :root {
-      --max-width: 600px;
-      --pad: 20px;
-      --glass: rgba(255, 255, 255, 0.1);
-      --text: #ffffff;
-    }
-
-    html, body {
-      height: 100%;
-    }
-
     body {
       margin: 0;
       font-family: 'Montserrat', sans-serif;
-      color: var(--text);
-      background: url("https://www.itstactical.com/wp-content/uploads/2013/07/night-sky-jeff-m-1024.png")
-                  no-repeat center center fixed;
+      background: url("https://www.itstactical.com/wp-content/uploads/2013/07/night-sky-jeff-m-1024.png") no-repeat center center fixed;
       background-size: cover;
-      /* Page entrance tween: 5px up then 5px down (smooth) */
+      color: white;
       animation: pageBounce 600ms ease-out;
     }
 
@@ -36,7 +21,17 @@
       100% { transform: translateY(0); }
     }
 
-    /* Greeting (bold Montserrat) */
+    @keyframes respondBounce {
+      0%   { transform: translateY(5px); opacity: 0; }
+      50%  { transform: translateY(-5px); opacity: 1; }
+      100% { transform: translateY(0); }
+    }
+
+    .ai-line span {
+      display: inline-block;
+      animation: respondBounce 500ms ease-out;
+    }
+
     #greeting {
       position: absolute;
       top: 20px;
@@ -47,7 +42,6 @@
       text-align: center;
     }
 
-    /* Messages area — no blurred frame */
     #chat-container {
       position: absolute;
       top: 60px;
@@ -55,11 +49,9 @@
       left: 50%;
       transform: translateX(-50%);
       width: 90%;
-      max-width: var(--max-width);
-      padding: 0 var(--pad);
+      max-width: 600px;
+      padding: 0 20px;
       overflow-y: auto;
-
-      /* Transparent scrollbar */
       scrollbar-width: thin;
       scrollbar-color: transparent transparent;
     }
@@ -70,11 +62,9 @@
       border-radius: 3px;
     }
 
-    /* Message blocks */
     .message { margin-bottom: 12px; line-height: 1.45; }
     .message strong { display: block; margin-bottom: 4px; }
 
-    /* Input at bottom-center */
     #chat-input {
       position: fixed;
       bottom: 20px;
@@ -86,14 +76,13 @@
       border: none;
       border-radius: 10px;
       font-size: 16px;
-      color: var(--text);
-      background: var(--glass);
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(6px);
       box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
     }
     #chat-input::placeholder { color: rgba(255, 255, 255, 0.6); }
 
-    /* Search toggle */
     .toggle-wrapper {
       position: fixed;
       bottom: 20px;
@@ -119,29 +108,12 @@
     }
     .switch input:checked + .slider { background-color: rgba(0, 255, 0, 0.5); }
     .switch input:checked + .slider:before { transform: translateX(24px); }
-
-    /* Per-response tween while typing:
-       - span starts invisible, animates 5px up->down and fades in
-       - keeps cozy motion without jittering the whole container */
-    @keyframes respondBounce {
-      0%   { transform: translateY(5px); opacity: 0; }
-      50%  { transform: translateY(-5px); opacity: 1; }
-      100% { transform: translateY(0); }
-    }
-    .ai-line span {
-      display: inline-block;
-      animation: respondBounce 500ms ease-out;
-      will-change: transform, opacity;
-    }
   </style>
 </head>
 <body>
   <div id="greeting">Hello, how can I help you with today?</div>
-
   <div id="chat-container"></div>
-
   <input id="chat-input" type="text" placeholder="Ask Blitz.AI something..." />
-
   <div class="toggle-wrapper">
     <label class="switch">
       <input type="checkbox" id="search-toggle" checked />
@@ -151,60 +123,57 @@
   </div>
 
   <script>
-    const chatContainer = document.getElementById('chat-container');
-    const chatInput = document.getElementById('chat-input');
-    const searchToggle = document.getElementById('search-toggle');
+    const chatContainer = document.getElementById("chat-container");
+    const chatInput = document.getElementById("chat-input");
+    const searchToggle = document.getElementById("search-toggle");
 
     let isTyping = false;
 
-    chatInput.addEventListener('keydown', async (e) => {
-      if (e.key === 'Enter' && chatInput.value.trim() && !isTyping) {
+    chatInput.addEventListener("keydown", async (e) => {
+      if (e.key === "Enter" && chatInput.value.trim() && !isTyping) {
         const prompt = chatInput.value.trim();
-        chatInput.value = '';
+        chatInput.value = "";
         isTyping = true;
 
-        appendMessage('You', prompt);
+        appendMessage("You", prompt);
         const reply = generateFromPrompt(prompt, searchToggle.checked);
-        await typeReply('Blitz AI', reply);
+        await typeReply("Blitz AI", reply);
 
         isTyping = false;
       }
     });
 
     function appendMessage(sender, text) {
-      const msg = document.createElement('div');
-      msg.className = 'message';
+      const msg = document.createElement("div");
+      msg.className = "message";
       msg.innerHTML = `<strong>${sender}:</strong>${escapeHtml(text)}`;
       chatContainer.appendChild(msg);
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
     async function typeReply(sender, text) {
-      // Create AI line with span that animates while typing
-      const msg = document.createElement('div');
-      msg.className = 'message ai-line';
-      const strong = document.createElement('strong');
-      strong.textContent = sender + ':';
-      const span = document.createElement('span'); // animated target
+      const msg = document.createElement("div");
+      msg.className = "message ai-line";
+      const strong = document.createElement("strong");
+      strong.textContent = sender + ":";
+      const span = document.createElement("span");
       msg.appendChild(strong);
       msg.appendChild(span);
       chatContainer.appendChild(msg);
 
-      // Smooth character-by-character typing
-      const chars = [...text];
-      for (let i = 0; i < chars.length; i++) {
-        span.textContent += chars[i];
+      for (let i = 0; i < text.length; i++) {
+        span.textContent += text[i];
         await sleep(18);
       }
 
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
-    // Dynamic, non-repetitive generator (no canned templates)
+    // Dynamic response generator
     function generateFromPrompt(prompt, searchEnabled) {
-      const tokens = prompt.trim().split(/\s+/);
-      const key = tokens[0]?.toLowerCase() || 'topic';
-      const tail = tokens.slice(1).join(' ');
+      const words = prompt.trim().split(/\s+/);
+      const topic = words[0] || "your idea";
+      const rest = words.slice(1).join(" ");
       const timeHint = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
       if (searchEnabled) {
@@ -214,8 +183,8 @@
           `common pitfalls plus ways to validate assumptions`,
           `design choices, trade-offs, and performance notes`
         ]);
-        return `🔎 ${timeHint} — exploring “${prompt}”: ${capitalize(key)} with ${angle}. ${
-          tail ? `Your focus on ${tail} adds helpful constraints.` : `Let me frame it cleanly and keep it actionable.`
+        return `🔎 ${timeHint} — exploring “${prompt}”: ${capitalize(topic)} with ${angle}. ${
+          rest ? `Your focus on ${rest} adds helpful constraints.` : `Let me frame it cleanly and keep it actionable.`
         }`;
       } else {
         const angle = choose([
@@ -224,7 +193,7 @@
           `We can prototype the idea before polishing`,
           `A quick mental model will keep it grounded`
         ]);
-        return `${angle}. Thinking about “${prompt}”, ${naturalBridge(key, tail)} — I’ll keep it specific and build on it step by step.`;
+        return `${angle}. Thinking about “${prompt}”, ${naturalBridge(topic, rest)} — I’ll keep it specific and build on it step by step.`;
       }
     }
 
@@ -236,14 +205,10 @@
     function choose(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
     function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
-    function naturalBridge(key, tail) {
-      if (!tail) {
-        return `we can anchor on ${key} and expand into practical steps`;
-      }
-      if (tail.length < 20) {
-        return `tie ${key} to ${tail} and test a minimal path`;
-      }
-      return `connect ${key} with ${tail} using a small iteration to validate`;
+    function naturalBridge(topic, rest) {
+      if (!rest) return `we can anchor on ${topic} and expand into practical steps`;
+      if (rest.length < 20) return `tie ${topic} to ${rest} and test a minimal path`;
+      return `connect ${topic} with ${rest} using a small iteration to validate`;
     }
   </script>
 </body>
