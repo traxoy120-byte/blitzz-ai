@@ -140,7 +140,7 @@
         isTyping = true;
 
         appendMessage("You", prompt);
-        const reply = buildGeneratedReply(prompt, searchToggle.checked);
+        const reply = generateFromPrompt(prompt, searchToggle.checked);
         await typeReply("Blitz AI", reply);
 
         isTyping = false;
@@ -170,23 +170,23 @@
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
-    function buildGeneratedReply(prompt, searchEnabled) {
-      const words = prompt.toLowerCase().split(/\s+/);
-      let reply = "";
+    function generateFromPrompt(prompt, searchEnabled) {
+      const words = prompt.trim().split(/\s+/);
+      let response = "";
 
       if (searchEnabled) {
-        reply += `🔎 Simulated search result for "${prompt}": `;
-        reply += `The term "${words[0]}" is commonly associated with `;
-        reply += words.slice(1).length > 0 ? words.slice(1).join(", ") : "various topics";
-        reply += `. It appears in discussions across multiple domains, suggesting its relevance in evolving contexts.`;
+        response += `🔎 Searching for "${prompt}"...\n`;
+        response += `The term "${words[0]}" is often discussed in relation to `;
+        response += words.slice(1).length ? words.slice(1).join(", ") : "various topics";
+        response += `. It appears in recent articles and discussions, suggesting its relevance in evolving contexts.`;
       } else {
-        reply += `Let’s explore "${prompt}" together. `;
-        reply += `When we think about "${words[0]}", it often leads to reflections on `;
-        reply += words.slice(1).length > 0 ? words.slice(1).join(", ") : "broader ideas";
-        reply += `. This opens up new ways to interpret and engage with the concept.`;
+        response += `Let’s think about "${prompt}". `;
+        response += `When we consider "${words[0]}", it often leads to thoughts about `;
+        response += words.slice(1).length ? words.slice(1).join(", ") : "broader ideas";
+        response += `. This opens up new ways to reflect and explore.`;
       }
 
-      return reply;
+      return response;
     }
   </script>
 </body>
