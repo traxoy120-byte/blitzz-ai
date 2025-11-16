@@ -171,20 +171,22 @@
     }
 
     function generateResponse(prompt, searchEnabled) {
-      const words = prompt.split(/\s+/);
-      const base = searchEnabled
-        ? `🔎 Searching for "${prompt}"... `
-        : `Thinking about "${prompt}"... `;
+      const words = prompt.toLowerCase().split(/\s+/);
+      let response = "";
 
-      let response = base;
-
-      for (let i = 0; i < words.length; i++) {
-        const word = words[i];
-        response += `The concept of "${word}" often leads to questions about `;
-        response += i % 2 === 0 ? "perspective, " : "context, ";
+      if (searchEnabled) {
+        response += `🔎 Simulated search for "${prompt}": `;
+        response += `The term "${words[0]}" appears in multiple contexts. `;
+        response += `Recent discussions suggest it relates to `;
+        response += words.slice(1).join(", ") || "various topics";
+        response += `. Further exploration may reveal deeper insights.`;
+      } else {
+        response += `Let’s think about "${prompt}". `;
+        response += `When we consider ${words[0]}, it often connects to `;
+        response += words.slice(1).join(", ") || "broader ideas";
+        response += `. This opens up new ways to reflect and explore.`;
       }
 
-      response += "which we can explore together.";
       return response;
     }
   </script>
