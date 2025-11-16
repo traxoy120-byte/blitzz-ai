@@ -166,8 +166,8 @@
         const reply = getSmartReply(prompt, searchEnabled);
 
         if (reply.startsWith("🔎")) {
-          showReply("Blitz AI", reply); // show search result first
-          appendMessage("You", prompt); // then show user message below
+          showReply("Blitz AI", reply);
+          appendMessage("You", prompt);
         } else {
           appendMessage("You", prompt);
           showReply("Blitz AI", reply);
@@ -200,30 +200,46 @@
     function getSmartReply(prompt, searchEnabled) {
       const lower = prompt.toLowerCase();
 
-      if (searchEnabled && (lower.includes("who is") || lower.includes("what is") || lower.includes("latest") || lower.includes("news"))) {
-        return `🔎 Searching for "${prompt}"...<br><em>Simulated result: [Insert relevant info here]</em>`;
+      if (searchEnabled && /(who|what|when|where|why|how|latest|news|define|meaning of)/.test(lower)) {
+        const fakeResult = [
+          `According to recent sources, "${prompt}" refers to a concept gaining traction in multiple fields.`,
+          `"${prompt}" is often discussed in the context of emerging technologies and social dynamics.`,
+          `Here's what I found: "${prompt}" is a term used in modern discourse around innovation.`,
+          `Quick search result: "${prompt}" is defined as a key idea in current thought.`,
+          `Based on simulated data, "${prompt}" is trending in academic and creative circles.`
+        ];
+        return "🔎 " + fakeResult[Math.floor(Math.random() * fakeResult.length)];
       }
 
       const openers = [
         "That's a great question.",
         "Interesting thought.",
-        "Let's unpack that.",
-        "Here's a perspective:",
-        "You might consider this:"
+        "Let’s explore that.",
+        "You’ve touched on something deep.",
+        "I like where you're going with this."
       ];
 
       const insights = [
-        "Sometimes the answer depends on context.",
-        "It helps to reframe the problem from another angle.",
-        "There's more than one way to approach this.",
-        "It could be a matter of perspective and intent.",
-        "Let’s explore this idea further together."
+        "Sometimes the answer depends on context and intention.",
+        "There’s more than one way to interpret that.",
+        "It might help to reframe the question.",
+        "This could be a matter of perspective.",
+        "Let’s break it down and see what emerges."
       ];
 
-      const opener = openers[Math.floor(Math.random() * openers.length)];
-      const insight = insights[Math.floor(Math.random() * insights.length)];
+      const followUps = [
+        "What do you think about that?",
+        "Does that resonate with you?",
+        "Want to go deeper?",
+        "Should we explore another angle?",
+        "Let’s keep going if you're curious."
+      ];
 
-      return `${opener} ${insight}`;
+      const intro = openers[Math.floor(Math.random() * openers.length)];
+      const insight = insights[Math.floor(Math.random() * insights.length)];
+      const follow = followUps[Math.floor(Math.random() * followUps.length)];
+
+      return `${intro} ${insight} ${follow}`;
     }
   </script>
 </body>
