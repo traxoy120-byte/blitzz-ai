@@ -17,6 +17,21 @@
       overflow: hidden;
     }
 
+    body *:not(html):not(body) {
+      animation: slideDown 0.4s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(-12px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
     #chat-container {
       position: absolute;
       top: 20px;
@@ -56,15 +71,13 @@
       color: rgba(255, 255, 255, 0.6);
     }
 
-    .typed span {
+    .fade-in {
       opacity: 0;
-      animation: fadeIn 0.3s ease-in forwards;
+      transition: opacity 0.4s ease-in;
     }
 
-    @keyframes fadeIn {
-      to {
-        opacity: 1;
-      }
+    .fade-in.visible {
+      opacity: 1;
     }
   </style>
 </head>
@@ -75,20 +88,19 @@
   <script>
     const chatContainer = document.getElementById("chat-container");
     const chatInput = document.getElementById("chat-input");
-
-    let isTyping = false;
+    let isResponding = false;
 
     chatInput.addEventListener("keydown", async (e) => {
-      if (e.key === "Enter" && chatInput.value.trim() && !isTyping) {
+      if (e.key === "Enter" && chatInput.value.trim() && !isResponding) {
         const prompt = chatInput.value.trim();
         appendMessage("You", prompt);
         chatInput.value = "";
-        isTyping = true;
+        isResponding = true;
 
         const reply = getSmartReply(prompt);
-        await typeReply("Blitz AI", reply);
+        showReply("Blitz AI", reply);
 
-        isTyping = false;
+        isResponding = false;
       }
     });
 
@@ -96,47 +108,49 @@
       const msg = document.createElement("div");
       msg.innerHTML = `<strong>${sender}:</strong> ${text}`;
       msg.style.marginBottom = "12px";
+      msg.classList.add("fade-in");
       chatContainer.appendChild(msg);
+      requestAnimationFrame(() => msg.classList.add("visible"));
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
-    async function typeReply(sender, text) {
+    function showReply(sender, text) {
       const msg = document.createElement("div");
-      msg.innerHTML = `<strong>${sender}:</strong> <span class="typed"></span>`;
+      msg.innerHTML = `<strong>${sender}:</strong> ${text}`;
       msg.style.marginBottom = "12px";
+      msg.classList.add("fade-in");
       chatContainer.appendChild(msg);
-
-      const typedSpan = msg.querySelector(".typed");
-      for (let i = 0; i < text.length; i++) {
-        const char = document.createElement("span");
-        char.textContent = text[i];
-        typedSpan.appendChild(char);
-        await new Promise(r => setTimeout(r, 18));
-      }
-
+      requestAnimationFrame(() => msg.classList.add("visible"));
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
     function getSmartReply(prompt) {
       const lower = prompt.toLowerCase();
 
-      if (lower.includes("hello") || lower.includes("hi")) {
-        return "Hey there. What’s on your mind?";
+      if (lower.includes("who is") || lower.includes("what is") || lower.includes("latest") || lower.includes("news")) {
+        return `🔎 Searching for "${prompt}"... (simulated result: [insert info here])`;
       }
 
-      if (lower.includes("who are you")) {
-        return "I'm Blitz AI — your cozy, clever companion for ideas, questions, and deep thoughts.";
-      }
+      const openers = [
+        "That's a great question.",
+        "Interesting thought.",
+        "Let's unpack that.",
+        "Here's a perspective:",
+        "You might consider this:"
+      ];
 
-      if (lower.includes("meaning of life")) {
-        return "Some say 42. I say: to create, to connect, to wonder. What’s your take?";
-      }
+      const insights = [
+        "Sometimes the answer depends on context.",
+        "It helps to reframe the problem from another angle.",
+        "There's more than one way to approach this.",
+        "It could be a matter of perspective and intent.",
+        "Let’s explore this idea further together."
+      ];
 
-      if (lower.includes("help") || lower.includes("stuck")) {
-        return "Let’s untangle it together. What’s the problem you’re facing?";
-      }
+      const opener = openers[Math.floor(Math.random() * openers.length)];
+      const insight = insights[Math.floor(Math.random() * insights.length)];
 
-      return "Hmm… that’s interesting. Tell me more about what you’re thinking.";
+      return `${opener} ${insight}`;
     }
   </script>
 </body>
