@@ -31,16 +31,6 @@
       background: rgba(0, 0, 0, 0.4);
       backdrop-filter: blur(6px);
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
-      scrollbar-width: thin;
-      scrollbar-color: transparent transparent;
-    }
-
-    #chat-container::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    #chat-container::-webkit-scrollbar-thumb {
-      background: transparent;
     }
 
     #chat-input {
@@ -66,9 +56,9 @@
       color: rgba(255, 255, 255, 0.6);
     }
 
-    .typed {
+    .typed span {
       opacity: 0;
-      animation: fadeIn 0.6s ease-in forwards;
+      animation: fadeIn 0.3s ease-in forwards;
     }
 
     @keyframes fadeIn {
@@ -95,7 +85,6 @@
         chatInput.value = "";
         isTyping = true;
 
-        // Simulated smart AI response (you can customize this logic)
         const reply = getSmartReply(prompt);
         await typeReply("Blitz AI", reply);
 
@@ -118,27 +107,16 @@
       chatContainer.appendChild(msg);
 
       const typedSpan = msg.querySelector(".typed");
-      let i = 0;
-
-      function typeNextChar() {
-        if (i < text.length) {
-          typedSpan.textContent += text[i];
-          i++;
-          setTimeout(typeNextChar, 18); // typing speed
-        } else {
-          msg.style.opacity = 0;
-          msg.style.transition = "opacity 0.6s ease-in";
-          requestAnimationFrame(() => {
-            msg.style.opacity = 1;
-          });
-        }
+      for (let i = 0; i < text.length; i++) {
+        const char = document.createElement("span");
+        char.textContent = text[i];
+        typedSpan.appendChild(char);
+        await new Promise(r => setTimeout(r, 18));
       }
 
-      typeNextChar();
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
-    // 🧠 Manual intelligence logic
     function getSmartReply(prompt) {
       const lower = prompt.toLowerCase();
 
