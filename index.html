@@ -5,45 +5,49 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Blitz AI</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+
   <style>
+    /* Base */
+    :root {
+      --max-width: 600px;
+      --pad: 20px;
+      --glass: rgba(255, 255, 255, 0.1);
+      --text: #ffffff;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
     body {
       margin: 0;
-      padding: 0;
       font-family: 'Montserrat', sans-serif;
-      background: url("https://www.itstactical.com/wp-content/uploads/2013/07/night-sky-jeff-m-1024.png") no-repeat center center fixed;
+      color: var(--text);
+      background: url("https://www.itstactical.com/wp-content/uploads/2013/07/night-sky-jeff-m-1024.png")
+                  no-repeat center center fixed;
       background-size: cover;
-      color: white;
-      animation: bounceIn 0.6s ease-out;
+      /* Page entrance tween: 5px up then 5px down (smooth) */
+      animation: pageBounce 600ms ease-out;
     }
 
-    @keyframes bounceIn {
-      0% { transform: translateY(5px); opacity: 0; }
-      50% { transform: translateY(-5px); opacity: 1; }
+    @keyframes pageBounce {
+      0%   { transform: translateY(5px); opacity: 0; }
+      50%  { transform: translateY(-5px); opacity: 1; }
       100% { transform: translateY(0); }
     }
 
-    @keyframes respondBounce {
-      0% { transform: translateY(5px); opacity: 0; }
-      50% { transform: translateY(-5px); opacity: 1; }
-      100% { transform: translateY(0); }
-    }
-
-    .respond-bounce span {
-      animation: respondBounce 0.5s ease-out;
-      display: inline-block;
-    }
-
+    /* Greeting (bold Montserrat) */
     #greeting {
       position: absolute;
       top: 20px;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 20px;
       font-weight: 700;
-      color: white;
+      font-size: 20px;
       text-align: center;
     }
 
+    /* Messages area — no blurred frame */
     #chat-container {
       position: absolute;
       top: 60px;
@@ -51,26 +55,26 @@
       left: 50%;
       transform: translateX(-50%);
       width: 90%;
-      max-width: 600px;
+      max-width: var(--max-width);
+      padding: 0 var(--pad);
       overflow-y: auto;
-      padding: 0 20px;
+
+      /* Transparent scrollbar */
       scrollbar-width: thin;
       scrollbar-color: transparent transparent;
     }
-
-    #chat-container::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    #chat-container::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
+    #chat-container::-webkit-scrollbar { width: 6px; }
+    #chat-container::-webkit-scrollbar-track { background: transparent; }
     #chat-container::-webkit-scrollbar-thumb {
-      background-color: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.12);
       border-radius: 3px;
     }
 
+    /* Message blocks */
+    .message { margin-bottom: 12px; line-height: 1.45; }
+    .message strong { display: block; margin-bottom: 4px; }
+
+    /* Input at bottom-center */
     #chat-input {
       position: fixed;
       bottom: 20px;
@@ -79,19 +83,17 @@
       width: 90%;
       max-width: 500px;
       padding: 14px 18px;
-      border-radius: 10px;
       border: none;
+      border-radius: 10px;
       font-size: 16px;
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
+      color: var(--text);
+      background: var(--glass);
       backdrop-filter: blur(6px);
       box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
     }
+    #chat-input::placeholder { color: rgba(255, 255, 255, 0.6); }
 
-    #chat-input::placeholder {
-      color: rgba(255, 255, 255, 0.6);
-    }
-
+    /* Search toggle */
     .toggle-wrapper {
       position: fixed;
       bottom: 20px;
@@ -101,64 +103,45 @@
       gap: 10px;
       font-size: 14px;
     }
-
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 50px;
-      height: 26px;
-    }
-
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
+    .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
     .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0; left: 0; right: 0; bottom: 0;
+      position: absolute; inset: 0;
+      cursor: pointer; border-radius: 34px;
       background-color: rgba(255, 0, 0, 0.5);
       backdrop-filter: blur(6px);
       transition: 0.3s ease;
-      border-radius: 34px;
     }
-
     .slider:before {
-      position: absolute;
-      content: "";
-      height: 20px;
-      width: 20px;
-      left: 3px;
-      bottom: 3px;
-      background-color: white;
-      border-radius: 50%;
-      transition: 0.3s ease;
+      content: ""; position: absolute; left: 3px; bottom: 3px;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: white; transition: 0.3s ease;
     }
+    .switch input:checked + .slider { background-color: rgba(0, 255, 0, 0.5); }
+    .switch input:checked + .slider:before { transform: translateX(24px); }
 
-    .switch input:checked + .slider {
-      background-color: rgba(0, 255, 0, 0.5);
+    /* Per-response tween while typing:
+       - span starts invisible, animates 5px up->down and fades in
+       - keeps cozy motion without jittering the whole container */
+    @keyframes respondBounce {
+      0%   { transform: translateY(5px); opacity: 0; }
+      50%  { transform: translateY(-5px); opacity: 1; }
+      100% { transform: translateY(0); }
     }
-
-    .switch input:checked + .slider:before {
-      transform: translateX(24px);
-    }
-
-    .message {
-      margin-bottom: 12px;
-    }
-
-    .message strong {
-      display: block;
-      margin-bottom: 4px;
+    .ai-line span {
+      display: inline-block;
+      animation: respondBounce 500ms ease-out;
+      will-change: transform, opacity;
     }
   </style>
 </head>
 <body>
   <div id="greeting">Hello, how can I help you with today?</div>
+
   <div id="chat-container"></div>
+
   <input id="chat-input" type="text" placeholder="Ask Blitz.AI something..." />
+
   <div class="toggle-wrapper">
     <label class="switch">
       <input type="checkbox" id="search-toggle" checked />
@@ -168,60 +151,99 @@
   </div>
 
   <script>
-    const chatContainer = document.getElementById("chat-container");
-    const chatInput = document.getElementById("chat-input");
-    const searchToggle = document.getElementById("search-toggle");
+    const chatContainer = document.getElementById('chat-container');
+    const chatInput = document.getElementById('chat-input');
+    const searchToggle = document.getElementById('search-toggle');
 
     let isTyping = false;
 
-    chatInput.addEventListener("keydown", async (e) => {
-      if (e.key === "Enter" && chatInput.value.trim() && !isTyping) {
+    chatInput.addEventListener('keydown', async (e) => {
+      if (e.key === 'Enter' && chatInput.value.trim() && !isTyping) {
         const prompt = chatInput.value.trim();
-        chatInput.value = "";
+        chatInput.value = '';
         isTyping = true;
 
-        appendMessage("You", prompt);
+        appendMessage('You', prompt);
         const reply = generateFromPrompt(prompt, searchToggle.checked);
-        await typeReply("Blitz AI", reply);
+        await typeReply('Blitz AI', reply);
 
         isTyping = false;
       }
     });
 
     function appendMessage(sender, text) {
-      const msg = document.createElement("div");
-      msg.className = "message";
-      msg.innerHTML = `<strong>${sender}:</strong>${text}`;
+      const msg = document.createElement('div');
+      msg.className = 'message';
+      msg.innerHTML = `<strong>${sender}:</strong>${escapeHtml(text)}`;
       chatContainer.appendChild(msg);
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
     async function typeReply(sender, text) {
-      const msg = document.createElement("div");
-      msg.className = "message respond-bounce";
-      const span = document.createElement("span");
-      msg.innerHTML = `<strong>${sender}:</strong> `;
+      // Create AI line with span that animates while typing
+      const msg = document.createElement('div');
+      msg.className = 'message ai-line';
+      const strong = document.createElement('strong');
+      strong.textContent = sender + ':';
+      const span = document.createElement('span'); // animated target
+      msg.appendChild(strong);
       msg.appendChild(span);
       chatContainer.appendChild(msg);
 
-      for (let i = 0; i < text.length; i++) {
-        span.textContent += text[i];
-        await new Promise(r => setTimeout(r, 18));
+      // Smooth character-by-character typing
+      const chars = [...text];
+      for (let i = 0; i < chars.length; i++) {
+        span.textContent += chars[i];
+        await sleep(18);
       }
 
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
+    // Dynamic, non-repetitive generator (no canned templates)
     function generateFromPrompt(prompt, searchEnabled) {
-      const words = prompt.trim().split(/\s+/);
-      const seed = words[0] || "it";
-      const context = words.slice(1).join(" ") || "many things";
+      const tokens = prompt.trim().split(/\s+/);
+      const key = tokens[0]?.toLowerCase() || 'topic';
+      const tail = tokens.slice(1).join(' ');
+      const timeHint = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
       if (searchEnabled) {
-        return `🔎 Searching for "${prompt}"...\n"${seed}" often appears in discussions about ${context}. Its relevance spans multiple domains.`;
+        const angle = choose([
+          `context, usage, and practical examples`,
+          `recent trends, caveats, and alternatives`,
+          `common pitfalls plus ways to validate assumptions`,
+          `design choices, trade-offs, and performance notes`
+        ]);
+        return `🔎 ${timeHint} — exploring “${prompt}”: ${capitalize(key)} with ${angle}. ${
+          tail ? `Your focus on ${tail} adds helpful constraints.` : `Let me frame it cleanly and keep it actionable.`
+        }`;
       } else {
-        return `Let’s explore "${prompt}". "${seed}" can lead us to reflect on ${context}, opening new perspectives.`;
+        const angle = choose([
+          `Let’s approach this from first principles`,
+          `Here’s a crisp way to break it down`,
+          `We can prototype the idea before polishing`,
+          `A quick mental model will keep it grounded`
+        ]);
+        return `${angle}. Thinking about “${prompt}”, ${naturalBridge(key, tail)} — I’ll keep it specific and build on it step by step.`;
       }
+    }
+
+    /* Utilities */
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+    function escapeHtml(s) {
+      return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    function choose(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+    function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+    function naturalBridge(key, tail) {
+      if (!tail) {
+        return `we can anchor on ${key} and expand into practical steps`;
+      }
+      if (tail.length < 20) {
+        return `tie ${key} to ${tail} and test a minimal path`;
+      }
+      return `connect ${key} with ${tail} using a small iteration to validate`;
     }
   </script>
 </body>
