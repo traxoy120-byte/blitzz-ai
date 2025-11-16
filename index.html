@@ -197,16 +197,18 @@
 
     async function typeReply(sender, text) {
       const msg = document.createElement("div");
-      msg.className = "message respond-bounce";
-      msg.innerHTML = `<strong>${sender}:</strong> <span></span>`;
+      msg.className = "message";
+      const span = document.createElement("span");
+      msg.innerHTML = `<strong>${sender}:</strong> `;
+      msg.appendChild(span);
       chatContainer.appendChild(msg);
 
-      const span = msg.querySelector("span");
       for (let i = 0; i < text.length; i++) {
         span.textContent += text[i];
         await new Promise(r => setTimeout(r, 18));
       }
 
+      msg.classList.add("respond-bounce");
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
