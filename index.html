@@ -23,7 +23,7 @@
 
     @keyframes slideDown {
       from {
-        transform: translateY(-12px);
+        transform: translateY(-10px);
         opacity: 0;
       }
       to {
@@ -51,10 +51,9 @@
     #chat-input {
       position: fixed;
       bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: calc(90% - 80px);
-      max-width: 520px;
+      left: 20px;
+      width: calc(100% - 120px);
+      max-width: 500px;
       padding: 12px 16px;
       border-radius: 8px;
       border: none;
@@ -80,7 +79,6 @@
       opacity: 1;
     }
 
-    /* Toggle Switch */
     .toggle-wrapper {
       position: fixed;
       bottom: 20px;
@@ -97,10 +95,6 @@
       display: inline-block;
       width: 50px;
       height: 26px;
-      background: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(6px);
-      border-radius: 50px;
-      transition: background 0.3s ease;
     }
 
     .switch input {
@@ -112,17 +106,33 @@
     .slider {
       position: absolute;
       cursor: pointer;
-      top: 2px;
-      left: 2px;
-      right: 2px;
-      bottom: 2px;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       background-color: rgba(255, 0, 0, 0.5);
-      transition: all 0.3s ease;
-      border-radius: 50px;
+      backdrop-filter: blur(6px);
+      transition: 0.3s ease;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      border-radius: 50%;
+      transition: 0.3s ease;
     }
 
     .switch input:checked + .slider {
       background-color: rgba(0, 255, 0, 0.5);
+    }
+
+    .switch input:checked + .slider:before {
       transform: translateX(24px);
     }
   </style>
@@ -149,12 +159,19 @@
     chatInput.addEventListener("keydown", async (e) => {
       if (e.key === "Enter" && chatInput.value.trim() && !isResponding) {
         const prompt = chatInput.value.trim();
-        appendMessage("You", prompt);
         chatInput.value = "";
         isResponding = true;
 
-        const reply = getSmartReply(prompt);
-        showReply("Blitz AI", reply);
+        const searchEnabled = searchToggle.checked;
+        const reply = getSmartReply(prompt, searchEnabled);
+
+        if (reply.startsWith("🔎")) {
+          showReply("Blitz AI", reply); // show search result first
+          appendMessage("You", prompt); // then show user message below
+        } else {
+          appendMessage("You", prompt);
+          showReply("Blitz AI", reply);
+        }
 
         isResponding = false;
       }
@@ -175,17 +192,16 @@
       msg.innerHTML = `<strong>${sender}:</strong> ${text}`;
       msg.style.marginBottom = "12px";
       msg.classList.add("fade-in");
-      chatContainer.appendChild(msg);
+      chatContainer.insertBefore(msg, chatContainer.lastElementChild);
       requestAnimationFrame(() => msg.classList.add("visible"));
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
-    function getSmartReply(prompt) {
+    function getSmartReply(prompt, searchEnabled) {
       const lower = prompt.toLowerCase();
-      const searchEnabled = searchToggle.checked;
 
       if (searchEnabled && (lower.includes("who is") || lower.includes("what is") || lower.includes("latest") || lower.includes("news"))) {
-        return `🔎 Searching for "${prompt}"... (simulated result: [insert info here])`;
+        return `🔎 Searching for "${prompt}"...<br><em>Simulated result: [Insert relevant info here]</em>`;
       }
 
       const openers = [
