@@ -140,7 +140,7 @@
         isTyping = true;
 
         appendMessage("You", prompt);
-        const reply = generateResponse(prompt, searchToggle.checked);
+        const reply = buildGeneratedReply(prompt, searchToggle.checked);
         await typeReply("Blitz AI", reply);
 
         isTyping = false;
@@ -170,24 +170,23 @@
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
-    function generateResponse(prompt, searchEnabled) {
+    function buildGeneratedReply(prompt, searchEnabled) {
       const words = prompt.toLowerCase().split(/\s+/);
-      let response = "";
+      let reply = "";
 
       if (searchEnabled) {
-        response += `🔎 Simulated search for "${prompt}": `;
-        response += `The term "${words[0]}" appears in multiple contexts. `;
-        response += `Recent discussions suggest it relates to `;
-        response += words.slice(1).join(", ") || "various topics";
-        response += `. Further exploration may reveal deeper insights.`;
+        reply += `🔎 Simulated search result for "${prompt}": `;
+        reply += `The term "${words[0]}" is commonly associated with `;
+        reply += words.slice(1).length > 0 ? words.slice(1).join(", ") : "various topics";
+        reply += `. It appears in discussions across multiple domains, suggesting its relevance in evolving contexts.`;
       } else {
-        response += `Let’s think about "${prompt}". `;
-        response += `When we consider ${words[0]}, it often connects to `;
-        response += words.slice(1).join(", ") || "broader ideas";
-        response += `. This opens up new ways to reflect and explore.`;
+        reply += `Let’s explore "${prompt}" together. `;
+        reply += `When we think about "${words[0]}", it often leads to reflections on `;
+        reply += words.slice(1).length > 0 ? words.slice(1).join(", ") : "broader ideas";
+        reply += `. This opens up new ways to interpret and engage with the concept.`;
       }
 
-      return response;
+      return reply;
     }
   </script>
 </body>
