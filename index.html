@@ -98,6 +98,17 @@
     #chat-input::placeholder {
       color: rgba(255, 255, 255, 0.6);
     }
+
+    .typed {
+      opacity: 0;
+      animation: fadeIn 0.6s ease-in forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
   </style>
 </head>
 <body>
@@ -136,13 +147,14 @@
 
     showSuggestions();
 
+    let isLoading = false;
+
     chatInput.addEventListener("keydown", async (e) => {
-      if (e.key === "Enter" && chatInput.value.trim()) {
+      if (e.key === "Enter" && chatInput.value.trim() && !isLoading) {
         const prompt = chatInput.value.trim();
         appendMessage("You", prompt);
         chatInput.value = "";
-
-        console.log("Sending prompt:", prompt);
+        isLoading = true;
 
         try {
           const res = await fetch("http://localhost:3000/chat", {
@@ -156,11 +168,12 @@
           }
 
           const data = await res.json();
-          console.log("Received response:", data);
-          appendMessage("Blitz AI", data.reply);
+          typeReply("Blitz AI", data.reply);
         } catch (err) {
           console.error("Fetch error:", err);
           appendMessage("Blitz AI", "⚠️ Error reaching the server.");
+        } finally {
+          isLoading = false;
         }
       }
     });
@@ -170,6 +183,33 @@
       msg.innerHTML = `<strong>${sender}:</strong> ${text}`;
       msg.style.marginBottom = "12px";
       chatContainer.appendChild(msg);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function typeReply(sender, text) {
+      const msg = document.createElement("div");
+      msg.innerHTML = `<strong>${sender}:</strong> <span class="typed"></span>`;
+      msg.style.marginBottom = "12px";
+      chatContainer.appendChild(msg);
+
+      const typedSpan = msg.querySelector(".typed");
+      let i = 0;
+
+      function typeNextChar() {
+        if (i < text.length) {
+          typedSpan.textContent += text[i];
+          i++;
+          setTimeout(typeNextChar, 20);
+        } else {
+          msg.style.opacity = 0;
+          msg.style.transition = "opacity 0.6s ease-in";
+          requestAnimationFrame(() => {
+            msg.style.opacity = 1;
+          });
+        }
+      }
+
+      typeNextChar();
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
   </script>
