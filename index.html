@@ -82,50 +82,16 @@
       box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
     }
     #chat-input::placeholder { color: rgba(255, 255, 255, 0.6); }
-
-    .toggle-wrapper {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 14px;
-    }
-    .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider {
-      position: absolute; inset: 0;
-      cursor: pointer; border-radius: 34px;
-      background-color: rgba(255, 0, 0, 0.5);
-      backdrop-filter: blur(6px);
-      transition: 0.3s ease;
-    }
-    .slider:before {
-      content: ""; position: absolute; left: 3px; bottom: 3px;
-      width: 20px; height: 20px; border-radius: 50%;
-      background: white; transition: 0.3s ease;
-    }
-    .switch input:checked + .slider { background-color: rgba(0, 255, 0, 0.5); }
-    .switch input:checked + .slider:before { transform: translateX(24px); }
   </style>
 </head>
 <body>
   <div id="greeting">Hello, how can I help you with today?</div>
   <div id="chat-container"></div>
   <input id="chat-input" type="text" placeholder="Ask Blitz.AI something..." />
-  <div class="toggle-wrapper">
-    <label class="switch">
-      <input type="checkbox" id="search-toggle" checked />
-      <span class="slider"></span>
-    </label>
-    <span>Search</span>
-  </div>
 
   <script>
     const chatContainer = document.getElementById("chat-container");
     const chatInput = document.getElementById("chat-input");
-    const searchToggle = document.getElementById("search-toggle");
 
     let isTyping = false;
 
@@ -136,7 +102,7 @@
         isTyping = true;
 
         appendMessage("You", prompt);
-        const reply = generateFromPrompt(prompt, searchToggle.checked);
+        const reply = generateSmartReply(prompt);
         await typeReply("Blitz AI", reply);
 
         isTyping = false;
@@ -169,47 +135,32 @@
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
-    // Dynamic response generator
-    function generateFromPrompt(prompt, searchEnabled) {
-      const words = prompt.trim().split(/\s+/);
-      const topic = words[0] || "your idea";
-      const rest = words.slice(1).join(" ");
+    function generateSmartReply(prompt) {
+      const cleaned = prompt.trim();
+      const lower = cleaned.toLowerCase();
       const timeHint = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-      if (searchEnabled) {
-        const angle = choose([
-          `context, usage, and practical examples`,
-          `recent trends, caveats, and alternatives`,
-          `common pitfalls plus ways to validate assumptions`,
-          `design choices, trade-offs, and performance notes`
-        ]);
-        return `🔎 ${timeHint} — exploring “${prompt}”: ${capitalize(topic)} with ${angle}. ${
-          rest ? `Your focus on ${rest} adds helpful constraints.` : `Let me frame it cleanly and keep it actionable.`
-        }`;
-      } else {
-        const angle = choose([
-          `Let’s approach this from first principles`,
-          `Here’s a crisp way to break it down`,
-          `We can prototype the idea before polishing`,
-          `A quick mental model will keep it grounded`
-        ]);
-        return `${angle}. Thinking about “${prompt}”, ${naturalBridge(topic, rest)} — I’ll keep it specific and build on it step by step.`;
+      if (cleaned.length < 3) {
+        return `Could you tell me a bit more? I want to give you a thoughtful response.`;
       }
+
+      if (lower.startsWith("how") || lower.startsWith("what") || lower.startsWith("why") || lower.endsWith("?")) {
+        return `🧠 ${timeHint} — That’s a great question. "${cleaned}" opens up a lot of interesting angles. Let’s break it down and explore what it really means.`;
+      }
+
+      const verbs = ["explore", "analyze", "reflect on", "prototype", "rethink"];
+      const tones = ["analytical", "curious", "playful", "practical", "philosophical"];
+      const verb = choose(verbs);
+      const tone = choose(tones);
+
+      return `Thinking about "${cleaned}", I’d like to ${verb} it with a ${tone} lens. Let’s see where it leads.`;
     }
 
-    /* Utilities */
     function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
     function escapeHtml(s) {
       return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
     function choose(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-    function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
-
-    function naturalBridge(topic, rest) {
-      if (!rest) return `we can anchor on ${topic} and expand into practical steps`;
-      if (rest.length < 20) return `tie ${topic} to ${rest} and test a minimal path`;
-      return `connect ${topic} with ${rest} using a small iteration to validate`;
-    }
   </script>
 </body>
 </html>
