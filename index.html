@@ -1,197 +1,122 @@
-Thanks for sticking with me, Chelsie — I’m fixing both issues right now:
-
-✅ What’s Fixed in This Version
-- Montserrat everywhere — including:
-- The input box text
-- The placeholder text
-- The typed message itself
-- Smarter AI replies — no more repeating “exploring ‘ok’…” or generic filler. Blitz AI now:
-- Detects questions vs ideas
-- Avoids echoing throwaway words
-- Generates varied, contextual responses
-
-🌌 Full Blitz AI HTML (Montserrat + Smart Replies)
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Blitz AI</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     body {
-      margin: 0;
       font-family: 'Montserrat', sans-serif;
-      background: url("https://www.itstactical.com/wp-content/uploads/2013/07/night-sky-jeff-m-1024.png") no-repeat center center fixed;
-      background-size: cover;
-      color: white;
-      animation: pageBounce 600ms ease-out;
+      background: radial-gradient(circle at top left, #1e1e2f, #0d0d1a);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
     }
-
-    @keyframes pageBounce {
-      0%   { transform: translateY(5px); opacity: 0; }
-      50%  { transform: translateY(-5px); opacity: 1; }
-      100% { transform: translateY(0); }
+    h1 {
+      font-weight: 600;
+      margin-bottom: 1rem;
     }
-
-    @keyframes respondBounce {
-      0%   { transform: translateY(5px); opacity: 0; }
-      50%  { transform: translateY(-5px); opacity: 1; }
-      100% { transform: translateY(0); }
-    }
-
-    .ai-line span {
-      display: inline-block;
-      animation: respondBounce 500ms ease-out;
-    }
-
-    #greeting {
-      position: absolute;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-weight: 700;
-      font-size: 20px;
-      text-align: center;
-    }
-
-    #chat-container {
-      position: absolute;
-      top: 60px;
-      bottom: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 90%;
+    #chat {
+      width: 100%;
       max-width: 600px;
-      padding: 0 20px;
-      overflow-y: auto;
-      scrollbar-width: thin;
-      scrollbar-color: transparent transparent;
+      background: #2a2a3d;
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
     }
-    #chat-container::-webkit-scrollbar { width: 6px; }
-    #chat-container::-webkit-scrollbar-track { background: transparent; }
-    #chat-container::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.12);
-      border-radius: 3px;
-    }
-
-    .message {
-      margin-bottom: 12px;
-      line-height: 1.45;
-      font-family: 'Montserrat', sans-serif;
-    }
-    .message strong {
-      display: block;
-      margin-bottom: 4px;
-      font-weight: 700;
-    }
-
-    #chat-input {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 90%;
-      max-width: 500px;
-      padding: 14px 18px;
+    input, button {
+      font-family: inherit;
+      font-size: 1rem;
+      padding: 0.5rem;
+      margin-top: 1rem;
+      border-radius: 6px;
       border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      font-family: 'Montserrat', sans-serif;
-      color: white;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(6px);
-      box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
     }
-
-    #chat-input::placeholder {
+    input {
+      width: 80%;
+    }
+    input::placeholder {
       font-family: 'Montserrat', sans-serif;
-      color: rgba(255, 255, 255, 0.6);
+      color: #aaa;
+    }
+    button {
+      background: #4e4efc;
+      color: white;
+      cursor: pointer;
+    }
+    #response {
+      margin-top: 1rem;
+      padding: 1rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      animation: fadeIn 0.6s ease-in-out;
+      transition: box-shadow 0.3s ease;
+    }
+    #response:hover {
+      box-shadow: 0 0 8px rgba(255,255,255,0.2);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
-  <div id="greeting">Hello, how can I help you with today?</div>
-  <div id="chat-container"></div>
-  <input id="chat-input" type="text" placeholder="Ask Blitz.AI something..." />
+  <h1>Blitz AI</h1>
+  <div id="chat">
+    <input type="text" id="prompt" placeholder="Ask Blitz AI something..." />
+    <button onclick="askBlitz()">Send</button>
+    <div id="response"></div>
+  </div>
 
   <script>
-    const chatContainer = document.getElementById("chat-container");
-    const chatInput = document.getElementById("chat-input");
+    const input = document.getElementById("prompt");
+    const responseBox = document.getElementById("response");
 
-    let isTyping = false;
+    async function generateSmartReply(prompt) {
+      try {
+        const res = await fetch("/api/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt })
+        });
+        const data = await res.json();
+        return data.reply || "Sorry, I couldn’t think of a good answer.";
+      } catch (err) {
+        return "Hmm, something went wrong connecting to Blitz AI.";
+      }
+    }
 
-    chatInput.addEventListener("keydown", async (e) => {
-      if (e.key === "Enter" && chatInput.value.trim() && !isTyping) {
-        const prompt = chatInput.value.trim();
-        chatInput.value = "";
-        isTyping = true;
+    async function askBlitz() {
+      const prompt = input.value.trim();
+      if (!prompt) {
+        responseBox.textContent = "Blitz AI is waiting patiently...";
+        return;
+      }
 
-        appendMessage("You", prompt);
-        const reply = generateSmartReply(prompt);
-        await typeReply("Blitz AI", reply);
+      responseBox.textContent = "Blitz AI is thinking...";
+      const reply = await generateSmartReply(prompt);
+      responseBox.textContent = "";
 
-        isTyping = false;
+      let i = 0;
+      function type() {
+        if (i < reply.length) {
+          responseBox.textContent += reply.charAt(i);
+          i++;
+          setTimeout(type, 40);
+        }
+      }
+      type();
+    }
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        askBlitz();
       }
     });
-
-    function appendMessage(sender, text) {
-      const msg = document.createElement("div");
-      msg.className = "message";
-      msg.innerHTML = `<strong>${sender}:</strong>${escapeHtml(text)}`;
-      chatContainer.appendChild(msg);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
-
-    async function typeReply(sender, text) {
-      const msg = document.createElement("div");
-      msg.className = "message ai-line";
-      const strong = document.createElement("strong");
-      strong.textContent = sender + ":";
-      const span = document.createElement("span");
-      msg.appendChild(strong);
-      msg.appendChild(span);
-      chatContainer.appendChild(msg);
-
-      for (let i = 0; i < text.length; i++) {
-        span.textContent += text[i];
-        await sleep(18);
-      }
-
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
-
-    function generateSmartReply(prompt) {
-      const cleaned = prompt.trim();
-      const lower = cleaned.toLowerCase();
-      const timeHint = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-      if (cleaned.length < 3) {
-        return `Could you tell me a bit more? I want to give you a thoughtful response.`;
-      }
-
-      if (lower.startsWith("how") || lower.startsWith("what") || lower.startsWith("why") || lower.endsWith("?")) {
-        return `🧠 ${timeHint} — That’s a great question. "${cleaned}" opens up a lot of interesting angles. Let’s break it down and explore what it really means.`;
-      }
-
-      const verbs = ["explore", "analyze", "reflect on", "prototype", "rethink"];
-      const tones = ["analytical", "curious", "playful", "practical", "philosophical"];
-      const verb = choose(verbs);
-      const tone = choose(tones);
-
-      return `Thinking about "${cleaned}", I’d like to ${verb} it with a ${tone} lens. Let’s see where it leads.`;
-    }
-
-    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-    function escapeHtml(s) {
-      return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    }
-    function choose(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
   </script>
 </body>
 </html>
-
-
-
-Now Blitz AI’s input box, placeholder, and messages all use Montserrat, and the response logic is smarter and more varied.
-Want me to add a startup animation or idle glow next?
