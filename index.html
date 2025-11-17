@@ -83,6 +83,7 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ prompt })
         });
+
         const data = await res.json();
         return data.reply || "Sorry, I couldn’t think of a good answer.";
       } catch (err) {
